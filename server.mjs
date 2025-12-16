@@ -6,8 +6,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// JSON file path in project root
-const STEP_FILE_PATH = path.join(__dirname, 'step-data.json');
+// JSON file path
+// 默认写在当前目录下的 step-data.json
+// 如果设置了环境变量 STEP_FILE_PATH，则优先使用该路径（用于生产容器把文件写到 nginx 静态目录）
+const STEP_FILE_PATH = process.env.STEP_FILE_PATH
+  ? process.env.STEP_FILE_PATH
+  : path.join(__dirname, 'step-data.json');
 
 // Ensure file exists with an initial value
 function ensureStepFile() {
