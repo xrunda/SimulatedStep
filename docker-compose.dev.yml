@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: stepmaster-admin:dev
+    container_name: stepmaster-admin-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # 挂载源代码以实现热重载
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
