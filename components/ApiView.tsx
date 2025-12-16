@@ -12,14 +12,9 @@ export const ApiView: React.FC<ApiViewProps> = ({ currentSteps }) => {
   const [activeTab, setActiveTab] = useState<TabType>('json');
 
   const apiResponse = {
-    status: "success",
-    data: {
-      user_id: "usr_sim_8829",
-      timestamp: new Date().toISOString(),
-      step_count: currentSteps,
-      reset_at: "00:00:00 local",
-      device_source: "StepMaster_Sim_v1"
-    }
+    "steps": 2612,
+    "status": "WALKING",
+    "timestamp": new Date().toISOString()
   };
 
   const getSnippet = () => {
@@ -27,11 +22,11 @@ export const ApiView: React.FC<ApiViewProps> = ({ currentSteps }) => {
       case 'json':
         return JSON.stringify(apiResponse, null, 2);
       case 'curl':
-        return `curl -X GET https://api.stepmaster.sim/v1/steps \\
+        return `curl -X GET https://step-simulator.dev.xrunda.com/step-data.json \\
   -H "Accept: application/json"`;
       case 'js':
         return `// JavaScript Fetch Example
-const response = await fetch('https://api.stepmaster.sim/v1/steps');
+const response = await fetch('https://step-simulator.dev.xrunda.com/step-data.json');
 const result = await response.json();
 
 console.log(\`当前步数: \${result.data.step_count}\`);`;
