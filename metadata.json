@@ -1,0 +1,5 @@
+{
+  "name": "运动步数管理后台",
+  "description": "一个模拟步数管理仪表盘，具有实时活动模拟、手动调整、历史记录可视化和 API 端点模拟功能。",
+  "requestFramePermissions": []
+}
