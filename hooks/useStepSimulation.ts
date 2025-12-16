@@ -23,6 +23,32 @@ export const useStepSimulation = () => {
     isSimulatingRef.current = isSimulating;
   }, [isSimulating]);
 
+  // 同步当前步数到后端 JSON 文件（通过本地 Node 服务）
+  useEffect(() => {
+    // 初始化阶段 steps 可能是 0，这里仍然同步，方便外部始终有文件
+    const controller = new AbortController();
+
+    const syncSteps = async () => {
+      try {
+        await fetch('/api/steps', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            steps,
+            status: activityStatus,
+          }),
+          signal: controller.signal,
+        });
+      } catch {
+        // 如果后端没启动或网络错误，静默忽略，不影响前端展示
+      }
+    };
+
+    syncSteps();
+
+    return () => controller.abort();
+  }, [steps, activityStatus]);
+
   // Initialize from LocalStorage
   useEffect(() => {
     const savedSteps = localStorage.getItem(STORAGE_KEY_STEPS);
