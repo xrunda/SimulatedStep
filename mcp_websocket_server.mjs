@@ -262,27 +262,58 @@ async function main() {
     if (message.method) {
       // Handle requests from the platform
       try {
-        // Convert message to MCP request format
-        const request = {
-          method: message.method,
-          params: message.params || {},
-        };
-
         let response;
         
         // Handle different request types
         if (message.method === 'tools/list') {
-          const listResponse = await server.handleRequest({
-            method: 'tools/list',
-            params: {},
-          });
-          response = listResponse;
+          // 直接返回工具列表
+          response = {
+            tools: [
+              {
+                name: 'get_wechat_steps',
+                description: '获取微信步数数据。从微信运动同步的步数信息，包括今日步数、活动状态、时间戳，以及计算的距离（公里）和消耗的卡路里（千卡）。',
+                inputSchema: {
+                  type: 'object',
+                  properties: {},
+                },
+              },
+            ],
+          };
         } else if (message.method === 'tools/call') {
-          const callResponse = await server.handleRequest({
-            method: 'tools/call',
-            params: message.params,
-          });
-          response = callResponse;
+          // 处理工具调用
+          const { name, arguments: args } = message.params;
+          
+          if (name === 'get_wechat_steps') {
+            // 从文件读取微信步数数据
+            const data = readStepData();
+            
+            // 计算距离和卡路里
+            const distance = (data.steps * 0.0007).toFixed(2);
+            const calories = Math.floor(data.steps * 0.04);
+
+            // 返回完整的微信步数信息
+            const wechatStepsInfo = {
+              steps: data.steps,
+              status: data.status,
+              timestamp: data.timestamp,
+              distance: parseFloat(distance),
+              distanceUnit: 'km',
+              calories,
+              caloriesUnit: 'kcal',
+              source: 'wechat',
+            };
+
+            response = {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(wechatStepsInfo, null, 2),
+                },
+              ],
+            };
+          } else {
+            throw new Error(`Unknown tool: ${name}`);
+          }
         } else if (message.method === 'initialize') {
           // Respond to initialize
           response = {
@@ -311,20 +342,23 @@ async function main() {
             jsonrpc: '2.0',
             id: message.id,
             error: {
-              code: error.code || -32603,
+              code: -32603,
               message: error.message || 'Internal error',
             },
           });
         }
       }
-    } else if (message.result && message.method === 'initialize') {
-      // Initialize response received, send initialized notification
-      await transport.send({
-        jsonrpc: '2.0',
-        method: 'notifications/initialized',
-      });
-      console.log('MCP server initialized and connected to Xiaozhi platform');
-      console.log('Available tool: get_wechat_steps (获取微信步数)');
+    } else if (message.id && message.result) {
+      // Handle initialize response
+      if (message.result.protocolVersion) {
+        // Initialize response received, send initialized notification
+        await transport.send({
+          jsonrpc: '2.0',
+          method: 'notifications/initialized',
+        });
+        console.log('MCP server initialized and connected to Xiaozhi platform');
+        console.log('Available tool: get_wechat_steps (获取微信步数)');
+      }
     }
   });
 
