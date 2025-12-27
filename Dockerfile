@@ -31,10 +31,13 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # 复制 Node 步数服务脚本
 COPY server.mjs /app/server.mjs
 
+# 复制 MCP WebSocket 服务器
+COPY mcp_websocket_server.mjs /app/mcp_websocket_server.mjs
+
 # 生产环境中，将步数 JSON 写入 nginx 静态目录
 ENV STEP_FILE_PATH=/usr/share/nginx/html/step-data.json
 
-# 复制启动脚本（同时启动 Node 服务和 nginx）
+# 复制启动脚本（同时启动 Node 服务、MCP 服务器和 nginx）
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 

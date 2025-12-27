@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "step-simulator": {
+      "command": "node",
+      "args": ["mcp_server.mjs"],
+      "env": {
+        "STEP_FILE_PATH": "./step-data.json"
+      }
+    }
+  }
+}
+

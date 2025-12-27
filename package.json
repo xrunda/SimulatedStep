@@ -7,13 +7,17 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "step-server": "node server.mjs"
+    "step-server": "node server.mjs",
+    "mcp-server": "node mcp_server.mjs",
+    "mcp-ws": "node mcp_websocket_server.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.7.2"
+    "recharts": "^2.7.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

@@ -1,0 +1,117 @@
+# 小智平台 MCP 工具注册指南
+
+本指南说明如何将步数模拟器 MCP 工具注册到小智平台。
+
+## 快速开始
+
+### 1. 安装依赖
+
+```bash
+npm install
+```
+
+### 2. 启动 WebSocket MCP 服务器
+
+```bash
+npm run mcp-ws
+```
+
+或者直接运行：
+
+```bash
+node mcp_websocket_server.mjs
+```
+
+### 3. 配置环境变量（可选）
+
+如果需要自定义步数文件路径：
+
+```bash
+export STEP_FILE_PATH=/path/to/step-data.json
+```
+
+如果需要使用不同的 WebSocket 端点：
+
+```bash
+export MCP_WS_ENDPOINT=wss://api.xiaozhi.me/mcp/?token=YOUR_TOKEN
+```
+
+## 当前配置
+
+默认的 WebSocket 端点已配置为：
+```
+wss://api.xiaozhi.me/mcp/?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+## 注册的工具
+
+服务器启动后，会自动注册以下 4 个工具到小智平台：
+
+1. **get_steps** - 获取当前步数数据
+2. **update_steps** - 更新步数（支持设置、增加/减少、更新状态）
+3. **reset_steps** - 重置步数为 0
+4. **get_step_status** - 获取步数状态详情（包括距离和卡路里）
+
+## 工具使用示例
+
+### 获取当前步数
+```json
+{
+  "tool": "get_steps",
+  "arguments": {}
+}
+```
+
+### 更新步数
+```json
+{
+  "tool": "update_steps",
+  "arguments": {
+    "add": 100,
+    "status": "WALKING"
+  }
+}
+```
+
+### 重置步数
+```json
+{
+  "tool": "reset_steps",
+  "arguments": {}
+}
+```
+
+### 获取步数详情
+```json
+{
+  "tool": "get_step_status",
+  "arguments": {}
+}
+```
+
+## 数据存储
+
+步数数据存储在 `step-data.json` 文件中，与原有的 HTTP API 服务器共享数据。
+
+## 故障排查
+
+### 连接失败
+- 检查网络连接
+- 确认 WebSocket 端点 URL 和 token 是否正确
+- 查看控制台错误信息
+
+### 工具调用失败
+- 确认服务器正在运行
+- 检查 `step-data.json` 文件权限
+- 查看服务器日志
+
+### 自动重连
+如果连接断开，服务器会自动尝试重连（每 5 秒一次）。
+
+## 注意事项
+
+1. 确保服务器持续运行，否则工具将不可用
+2. Token 有过期时间，过期后需要更新
+3. 步数数据文件需要有写入权限
+4. 服务器会自动处理重连，无需手动干预
+
