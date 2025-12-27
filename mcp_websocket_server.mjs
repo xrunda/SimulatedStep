@@ -88,46 +88,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: 'get_steps',
-        description: '获取当前步数数据。返回当前步数、活动状态和时间戳。',
-        inputSchema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-      {
-        name: 'update_steps',
-        description: '更新步数。可以增加或设置步数，并更新活动状态。',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            steps: {
-              type: 'number',
-              description: '新的步数值。如果提供，将直接设置为该值。',
-            },
-            add: {
-              type: 'number',
-              description: '要增加的步数（可以是负数来减少步数）。',
-            },
-            status: {
-              type: 'string',
-              enum: ['IDLE', 'WALKING', 'RUNNING'],
-              description: '活动状态：IDLE（静止）、WALKING（行走中）、RUNNING（跑步中）',
-            },
-          },
-        },
-      },
-      {
-        name: 'reset_steps',
-        description: '重置步数为 0，并更新状态为 IDLE。',
-        inputSchema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-      {
-        name: 'get_step_status',
-        description: '获取步数状态信息，包括当前步数、状态、时间戳，以及计算的距离（公里）和消耗的卡路里（千卡）。',
+        name: 'get_wechat_steps',
+        description: '获取微信步数数据。从微信运动同步的步数信息，包括今日步数、活动状态、时间戳，以及计算的距离（公里）和消耗的卡路里（千卡）。',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -143,102 +105,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case 'get_steps': {
+      case 'get_wechat_steps': {
+        // 从文件读取微信步数数据
         const data = readStepData();
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(data, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'update_steps': {
-        const currentData = readStepData();
-        let newSteps = currentData.steps;
-        let newStatus = currentData.status;
-
-        if (args?.steps !== undefined) {
-          newSteps = Number(args.steps);
-        } else if (args?.add !== undefined) {
-          newSteps = currentData.steps + Number(args.add);
-        }
-
-        if (args?.status) {
-          newStatus = args.status;
-        }
-
-        if (newSteps < 0) {
-          newSteps = 0;
-        }
-
-        const updatedData = {
-          steps: newSteps,
-          status: newStatus,
-          timestamp: new Date().toISOString(),
-        };
-
-        const success = writeStepData(updatedData);
-
-        if (!success) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            'Failed to write step data to file'
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                data: updatedData,
-                message: `步数已更新为 ${updatedData.steps}，状态：${updatedData.status}`,
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'reset_steps': {
-        const resetData = {
-          steps: 0,
-          status: 'IDLE',
-          timestamp: new Date().toISOString(),
-        };
-
-        const success = writeStepData(resetData);
-
-        if (!success) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            'Failed to write step data to file'
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                data: resetData,
-                message: '步数已重置为 0',
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'get_step_status': {
-        const data = readStepData();
+        
+        // 计算距离和卡路里
         const distance = (data.steps * 0.0007).toFixed(2);
         const calories = Math.floor(data.steps * 0.04);
 
-        const statusInfo = {
+        // 返回完整的微信步数信息
+        const wechatStepsInfo = {
           steps: data.steps,
           status: data.status,
           timestamp: data.timestamp,
@@ -246,13 +122,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           distanceUnit: 'km',
           calories,
           caloriesUnit: 'kcal',
+          source: 'wechat',
         };
 
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(statusInfo, null, 2),
+              text: JSON.stringify(wechatStepsInfo, null, 2),
             },
           ],
         };
@@ -447,7 +324,7 @@ async function main() {
         method: 'notifications/initialized',
       });
       console.log('MCP server initialized and connected to Xiaozhi platform');
-      console.log('Available tools: get_steps, update_steps, reset_steps, get_step_status');
+      console.log('Available tool: get_wechat_steps (获取微信步数)');
     }
   });
 

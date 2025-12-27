@@ -45,49 +45,41 @@ wss://api.xiaozhi.me/mcp/?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## 注册的工具
 
-服务器启动后，会自动注册以下 4 个工具到小智平台：
+服务器启动后，会自动注册以下工具到小智平台：
 
-1. **get_steps** - 获取当前步数数据
-2. **update_steps** - 更新步数（支持设置、增加/减少、更新状态）
-3. **reset_steps** - 重置步数为 0
-4. **get_step_status** - 获取步数状态详情（包括距离和卡路里）
+1. **get_wechat_steps** - 获取微信步数数据（只读）
+   - 返回今日微信步数、活动状态、时间戳
+   - 自动计算距离（公里）和消耗的卡路里（千卡）
+   - 数据来源：从微信运动同步的步数信息
 
 ## 工具使用示例
 
-### 获取当前步数
+### 获取微信步数
 ```json
 {
-  "tool": "get_steps",
+  "tool": "get_wechat_steps",
   "arguments": {}
 }
 ```
 
-### 更新步数
+**返回示例：**
 ```json
 {
-  "tool": "update_steps",
-  "arguments": {
-    "add": 100,
-    "status": "WALKING"
-  }
+  "steps": 1234,
+  "status": "WALKING",
+  "timestamp": "2025-12-27T06:13:52.127Z",
+  "distance": 0.86,
+  "distanceUnit": "km",
+  "calories": 49,
+  "caloriesUnit": "kcal",
+  "source": "wechat"
 }
 ```
 
-### 重置步数
-```json
-{
-  "tool": "reset_steps",
-  "arguments": {}
-}
-```
-
-### 获取步数详情
-```json
-{
-  "tool": "get_step_status",
-  "arguments": {}
-}
-```
+**在小智平台使用：**
+- "帮我查看今天的微信步数"
+- "我的微信步数是多少？"
+- "查看微信步数详情"
 
 ## 数据存储
 
