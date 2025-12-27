@@ -28,6 +28,10 @@ WORKDIR /app
 # 从构建阶段复制构建产物
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# 复制 package.json 和 node_modules（MCP 服务器需要这些依赖）
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/node_modules /app/node_modules
+
 # 复制 Node 步数服务脚本
 COPY server.mjs /app/server.mjs
 
